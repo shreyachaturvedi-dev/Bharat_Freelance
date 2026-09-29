@@ -13,23 +13,35 @@ const profileRoutes = require("./routes/profile");
 
 const app = express();
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://bharat-freelance-eight.vercel.app",
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
-  credentials: true,
-}));
+// =========================
+// CORS
+// =========================
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://bharat-freelance-eight.vercel.app",
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Connect to MongoDB
+// =========================
+// CONNECT TO MONGODB
+// =========================
+
 connectDB();
 
-// API Routes
+// =========================
+// API ROUTES
+// =========================
+
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/ats", atsRoutes);
@@ -37,22 +49,34 @@ app.use("/api/pay", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/profile", profileRoutes);
 
-// Health check
+// =========================
+// HEALTH CHECK
+// =========================
+
 app.get("/api/health", (req, res) => {
   res.json({
     status: "✅ Bharat Freelance API running",
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 });
 
-// Default
-app.get("/", (req, res) => {
-  res.json({
-    msg: "Bharat Freelance API - Backend Running 🚀"
-  });
+// =========================
+// SERVE FRONTEND
+// =========================
+
+const frontendPath = path.join(__dirname, "../frontend/dist");
+
+app.use(express.static(frontendPath));
+
+// React/Vite fallback
+app.use((req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// Render keep-alive
+// =========================
+// RENDER KEEP-ALIVE
+// =========================
+
 const SELF_URL =
   process.env.RENDER_EXTERNAL_URL ||
   `http://localhost:${process.env.PORT || 5000}`;
@@ -60,11 +84,13 @@ const SELF_URL =
 function startKeepAlive() {
   setInterval(async () => {
     try {
-      const res = await fetch(`${SELF_URL}/api/health`);
-      const data = await res.json();
+      const response = await fetch(`${SELF_URL}/api/health`);
+      const data = await response.json();
 
       console.log(
-        `🏓 Keep-alive ping OK [${new Date().toLocaleTimeString("en-IN")}] →`,
+        `🏓 Keep-alive ping OK [${new Date().toLocaleTimeString(
+          "en-IN"
+        )}] →`,
         data.status
       );
     } catch (err) {
@@ -73,9 +99,13 @@ function startKeepAlive() {
   }, 14 * 60 * 1000);
 }
 
+// =========================
+// START SERVER
+// =========================
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🔥 Backend live on http://localhost:${PORT}`);
+  console.log(`🔥 Bharat Freelance running on port ${PORT}`);
   startKeepAlive();
 });

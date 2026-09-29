@@ -1,10 +1,18 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 const getHeaders = (isMultipart = false) => {
   const token = localStorage.getItem('token');
+
   const headers = {};
-  if (!isMultipart) headers['Content-Type'] = 'application/json';
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  if (!isMultipart) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   return headers;
 };
 
@@ -13,6 +21,7 @@ export const api = {
     const res = await fetch(`${API_URL}${endpoint}`, {
       headers: getHeaders(),
     });
+
     return res.json();
   },
 
@@ -22,6 +31,7 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(body),
     });
+
     return res.json();
   },
 
@@ -31,6 +41,7 @@ export const api = {
       headers: getHeaders(true),
       body: formData,
     });
+
     return res.json();
   },
 
@@ -40,6 +51,7 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify(body),
     });
+
     return res.json();
   },
 
@@ -48,6 +60,7 @@ export const api = {
       method: 'DELETE',
       headers: getHeaders(),
     });
+
     return res.json();
   },
 };
